@@ -1,0 +1,52 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/openFrameworks",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/openFrameworks/3d",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/openFrameworks/app",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/openFrameworks/communication",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/openFrameworks/events",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/openFrameworks/gl",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/openFrameworks/graphics",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/openFrameworks/math",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/openFrameworks/sound",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/openFrameworks/types",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/openFrameworks/utils",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/openFrameworks/video",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/boost/include",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/cairo/include/cairo",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/curl/include",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/fmodex/include",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/FreeImage/include",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/freetype/include",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/glew/include",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/glfw/include",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/glm/include",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/json/include",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/pugixml/include",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/rtAudio/include",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/tess2/include",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/uriparser/include",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/utf8/include",
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/src/**",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/openFrameworks",
+                "/usr/local/Cellar/opencv/4.0.1/include/opencv4",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/openFrameworks/**",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/openFrameworks",
+                "/Users/icke/Documents/OF/of_v0.10.1_osx_release/libs/openFrameworks/utils/**"
+            ],
+            "defines": [],
+            "macFrameworkPath": [
+                "/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/System/Library/Frameworks"
+            ],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "clang-x64"
+        }
+    ],
+    "version": 4
+}

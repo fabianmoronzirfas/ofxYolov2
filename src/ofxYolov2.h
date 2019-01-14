@@ -11,39 +11,14 @@
 #include <algorithm>
 #include <cstdlib>
 
+#include "Object.h"
+#include "TrainObject.h"
+#include "Person.h"
+#include "utilities.h"
+
 using namespace std;
 using namespace cv;
 using namespace cv::dnn;
-
-std::string Replace( std::string String1, std::string String2, std::string String3 );
-bool doesIncludeExtensions(string _filename, vector<string>_extensions);
-
-class TrainObject{
-public:
-    TrainObject(int _id, string _name, ofRectangle _r){
-        id = _id;
-        name = _name;
-        r.set(_r);
-    }
-    ~TrainObject(){
-        
-    }
-    int id;
-    string name;
-    ofRectangle r;
-    ofRectangle getScaledBB(float _w, float _h);
-};
-
-class Object{
-public:
-    Object(int _class_id, string _name, float _p, float _x, float _y, float _w, float _h);
-    ~Object();
-    ofRectangle r;
-    ofRectangle getScaledBB(float _w, float _h);
-    string name;
-    float p;
-    int class_id;
-};
 
 class ofxYolov2{
 public:
@@ -57,7 +32,7 @@ public:
 
     void setNextAnnotation();
     void setPreviousAnnotation();
-    
+
     void loadAnnotationDir(string _path_to_file);
     void loadAnnotationImage(string _path_to_file);
     void loadBoundingBoxFile(string _path_to_file);
@@ -66,16 +41,18 @@ public:
 
     void drawClassSelector(float _x, float _y, int _row);
     void addTrainObject(ofRectangle _r);
-    
-    vector<Object> object;
+
+    vector<Object> objects;
     vector<TrainObject>train;
-    
+    vector<Object> persons;
+
     cv::Mat toCV(ofPixels &pix);
     dnn::Net net;
     int network_width = 416;
     int network_height = 416;
     vector<string> classNamesVec;
     vector<ofColor> detection_color;
+    vector<Person> person_persistance_list;
     float confidenceThreshold;
     ofTrueTypeFont font_info;
 
@@ -87,5 +64,7 @@ public:
     int pos_annotation_file;
     ofImage image_annotation;
     int class_id_selected;
+    int yolo_version = 2;
+    int person_count = 0;
 
 };

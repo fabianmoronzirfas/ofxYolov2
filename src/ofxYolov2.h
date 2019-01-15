@@ -41,6 +41,7 @@ public:
 
     void drawClassSelector(float _x, float _y, int _row);
     void addTrainObject(ofRectangle _r);
+    int getPersonCount();
 
     vector<Object> objects;
     vector<TrainObject>train;

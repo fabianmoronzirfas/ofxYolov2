@@ -8,10 +8,11 @@ class Person{
   ofRectangle rect;
   bool available;
   bool del;
-  int timer = 127;
+  int timer;
   int id;
-  void draw();
-  void update(const ofRectangle& _r);
+  ofRectangle getScaledBB(float _w, float _h);
+  // void draw();
+  void update(const ofRectangle _r);
   void countDown();
   bool dead();
 };

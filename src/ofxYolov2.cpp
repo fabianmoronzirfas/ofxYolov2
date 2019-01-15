@@ -138,22 +138,7 @@ void ofxYolov2::setup(string _path_to_cfg, string _path_to_weights, string _path
     class_id_selected = 0; // default
 }
 
-void ofxYolov2::draw(float _x, float _y, float _w, float _h)
-{
-    for( int i = 0; i < objects.size(); i++ ){
-        ofNoFill();
-        ofSetLineWidth(3);
-        ofSetColor(detection_color.at(objects[i].class_id));
-        ofRectangle r_scaled = objects.at(i).getScaledBB(_w, _h);
-        ofDrawRectangle(r_scaled);
 
-        ofFill();
-        ofDrawRectangle(r_scaled.x, r_scaled.y-18,r_scaled.width,18);
-        ofSetColor(ofColor::white);
-        font_info.drawString("["+ofToString(objects.at(i).class_id)+"]: "+objects.at(i).name + ": " + ofToString(objects.at(i).p),
-                                    r_scaled.x,r_scaled.y);
-    }
-}
 
 void ofxYolov2::drawAnnotation(float _x, float _y, float _w, float _h)
 {
@@ -194,10 +179,41 @@ cv::Mat ofxYolov2::toCV(ofPixels &pix)
     return cv::Mat(pix.getHeight(), pix.getWidth(), CV_MAKETYPE(CV_8U, pix.getNumChannels()), pix.getData(), 0);
 }
 
+
+void ofxYolov2::draw(float _x, float _y, float _w, float _h) {
+
+    for( int i = 0; i < objects.size(); i++ ){
+        ofNoFill();
+        ofSetLineWidth(3);
+        ofSetColor(detection_color.at(objects[i].class_id));
+        ofRectangle r_scaled = objects.at(i).getScaledBB(_w, _h);
+        ofDrawRectangle(r_scaled);
+
+        ofFill();
+        ofDrawRectangle(r_scaled.x, r_scaled.y-18,r_scaled.width,18);
+        ofSetColor(ofColor::white);
+        font_info.drawString("["+ofToString(objects.at(i).class_id)+"]: "+objects.at(i).name + ": " + ofToString(objects.at(i).confidence),
+                                    r_scaled.x,r_scaled.y);
+    }
+
+    for(auto pp: person_persistance_list){
+        // pp.draw();
+
+        ofNoFill();
+        ofSetLineWidth(2);
+        ofSetColor(ofColor::tomato);
+        ofRectangle rect_scaled = pp.getScaledBB(_w, _h);
+        // cout << pp.id << endl;
+        cout << "X: " << pp.rect.getX() << " Y: " << pp.rect.getY() << " w: " << pp.rect.getWidth() << " h: " << pp.rect.getHeight() << endl;
+        ofDrawRectangle(rect_scaled);
+    }
+}
+
 void ofxYolov2::update(ofPixels &op) {
     // Scenario 1 Personlist is empty
 
     objects.clear();
+    persons.clear();
 
     cv::Mat frame = toCV(op);
 
@@ -234,8 +250,8 @@ void ofxYolov2::update(ofPixels &op) {
         float confidence = detectionMat.at<float>(i, (int)objectClass + probability_index);
         if(confidence > 0){
 
-        std::cout << "Confidence: " << confidence << endl;
-        std::cout << "Class: " << String(classNamesVec[objectClass]) << endl;
+        // std::cout << "Confidence: " << confidence << endl;
+        // std::cout << "Class: " << String(classNamesVec[objectClass]) << endl;
         }
         if (confidence > confidenceThreshold)
         {
@@ -267,11 +283,139 @@ void ofxYolov2::update(ofPixels &op) {
             }
         }
     } // end if detection
-    for(const auto obj: objects){
+    // filter objects for persons
+    for(const auto& obj: objects){
         if(obj.class_id == 0) {
             persons.push_back(obj);
         }
     }
+    // debugging output
+    // cout << "Persons list" << endl;
+    // for(const auto& person: persons){
+    //     cout << person.name << " " << person.confidence << " ";
+    // }
+    // cout << endl;
+    // We dont have any perons in our list
+    // add them
+    if(person_persistance_list.empty()){
+        for(const auto& person: persons){
+            person_persistance_list.push_back(
+                Person(
+                    person.r.getX(),
+                    person.r.getY(),
+                    person.r.getWidth(),
+                    person.r.getHeight(),
+                    getPersonCount()));
+                    // cout << person_count << "\tperson_count" << endl;
+                    // cout << person.r.getX() << "\tperson.r.getX()" << endl;
+                    // cout << person.r.getY() << "\tperson.r.getY()" << endl;
+                    // cout << person.r.getWidth() << "\tperson.r.getWidth()" << endl;
+                    // cout << person.r.getHeight() << "\tperson.r.getHeight()" << endl;
+        }
+    }else if(person_persistance_list.size()<=persons.size()){
+        vector<bool> used(persons.size());
+        for(auto& pp: person_persistance_list){
+            float record = 50000;
+            int index = -1;
+            for (int i = 0; i < persons.size(); i++){
+                float d = ofDist(
+                    persons[i].r.getX(),
+                    persons[i].r.getY(),
+                    pp.rect.getX(),
+                    pp.rect.getY());
+
+                    if(d < record && !used[i]){
+                        record = d;
+                        index = i;
+                    }
+            }
+            used[index] = true;
+            pp.update(persons[index].r);
+
+            // cout << " update existing" << endl;
+            // cout << pp.id << "\t\tpp.id" << endl;
+            // cout << pp.rect.getX() << "\tpp.rect.getX()" << endl;
+            // cout << pp.rect.getY() << "\tpp.rect.getY()" << endl;
+            // cout << pp.rect.getWidth() << "\tpp.rect.getWidth()" << endl;
+            // cout << pp.rect.getHeight() << "\tpp.rect.getHeight()" << endl;
+            // cout << endl;
+
+            // cout << persons[index].r.getX() << "\tpersons[index].r.getX()" << endl;
+            // cout << persons[index].r.getY() << "\tpersons[index].r.getY()" << endl;
+            // cout << persons[index].r.getWidth() << "\tpersons[index].r.getWidth()" << endl;
+            // cout << persons[index].r.getHeight() << "\tpersons[index].r.getHeight()" << endl;
+            // cout << endl;
+
+        }
+        // add unused persons
+        for(int i = 0; i < persons.size();i++){
+            if(used[i] != true){
+                person_persistance_list.push_back(Person(
+                    persons[i].r.getX(),
+                    persons[i].r.getY(),
+                    persons[i].r.getWidth(),
+                    persons[i].r.getHeight(),
+                    getPersonCount()));
+                    // cout << "add new ones pp with id "<< person_count << endl;
+                    // cout << person_count <<" person_count"<< endl;
+                    // cout << persons[i].r.getX() << "\tpersons[i].r.getX()" << endl;
+                    // cout << persons[i].r.getY() << "\tpersons[i].r.getY()" << endl;
+                    // cout << persons[i].r.getWidth() << "\tpersons[i].r.getWidth()" << endl;
+                    // cout << persons[i].r.getHeight() << "\tpersons[i].r.getHeight()" << endl;
+
+            }
+        }
+    // SCENARIO 3: We have more Face objects than face Rectangles found
+    // removing old ones that are not in use anymore
+    }else{
+        for (auto& pp : person_persistance_list) {
+            pp.available = true;
+        }
+        for(int i = 0; i < persons.size(); i++){
+            float record = 50000;
+            int index = -1;
+            for(int j = 0; j < person_persistance_list.size(); j++){
+                Person pp = person_persistance_list[j];
+                float d = ofDist(
+                    persons[i].r.getX(),
+                    persons[i].r.getY(),
+                    pp.rect.getX(),
+                    pp.rect.getY()
+                );
+                if(d < record && pp.available == true){
+                    record = d;
+                    index = j;
+                }
+            }
+            Person pp = person_persistance_list[index];
+            pp.available = false;
+            pp.update(persons[i].r);
+        }
+        for(auto& pp: person_persistance_list){
+            if(pp.available){
+                pp.countDown();
+                cout << "timer: " << pp.timer << endl;
+                if(pp.dead()){
+                    pp.del = true;
+                }
+            }
+        }
+    }
+    for(int i = person_persistance_list.size()-1; i>=0;i--){
+        Person pp = person_persistance_list[i];
+        cout << " should i delete? " << pp.del << endl;
+        if(pp.del == true){
+            cout << "removing person at index " << i << endl;
+            person_persistance_list.erase(person_persistance_list.begin() + i);
+        }
+    }
+
+}
+int ofxYolov2::getPersonCount(){
+    int val = person_count;
+    person_count++;
+    cout << " old " << val << " new " << person_count<< endl;
+    return val;
 }
 
 void ofxYolov2::setConfidenceThreshold(float _threshold)

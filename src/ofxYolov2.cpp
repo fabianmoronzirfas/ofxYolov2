@@ -14,20 +14,31 @@ string Replace( string String1, string String2, string String3 )
     return String1;
 }
 
-ofxYolov2::ofxYolov2()
-{
+ofxYolov2::ofxYolov2() {
 
 }
 
 
-ofxYolov2::~ofxYolov2()
-{
+ofxYolov2::~ofxYolov2() {
 
 }
 
 
-void ofxYolov2::setup(string _path_to_cfg, string _path_to_weights, string _path_to_names)
-{
+
+
+// ███████╗███████╗████████╗██╗   ██╗██████╗
+// ██╔════╝██╔════╝╚══██╔══╝██║   ██║██╔══██╗
+// ███████╗█████╗     ██║   ██║   ██║██████╔╝
+// ╚════██║██╔══╝     ██║   ██║   ██║██╔═══╝
+// ███████║███████╗   ██║   ╚██████╔╝██║
+// ╚══════╝╚══════╝   ╚═╝    ╚═════╝ ╚═╝
+
+
+
+
+
+
+void ofxYolov2::setup(string _path_to_cfg, string _path_to_weights, string _path_to_names) {
 //    putenv("OPENCV_OPENCL_RUNTIME=");
 //    putenv("OPENCV_OPENCL_DEVICE=:DGPU:0");
 
@@ -69,6 +80,7 @@ void ofxYolov2::setup(string _path_to_cfg, string _path_to_weights, string _path
     }
     net.setPreferableBackend(DNN_BACKEND_DEFAULT);
     net.setPreferableTarget(DNN_TARGET_CPU);
+    outNames = net.getUnconnectedOutLayersNames();
 
 
     if (net.empty())
@@ -180,34 +192,17 @@ cv::Mat ofxYolov2::toCV(ofPixels &pix)
 }
 
 
-void ofxYolov2::draw(float _x, float _y, float _w, float _h) {
 
-    for( int i = 0; i < objects.size(); i++ ){
-        ofNoFill();
-        ofSetLineWidth(3);
-        ofSetColor(detection_color.at(objects[i].class_id));
-        ofRectangle r_scaled = objects.at(i).getScaledBB(_w, _h);
-        ofDrawRectangle(r_scaled);
 
-        ofFill();
-        ofDrawRectangle(r_scaled.x, r_scaled.y-18,r_scaled.width,18);
-        ofSetColor(ofColor::white);
-        font_info.drawString("["+ofToString(objects.at(i).class_id)+"]: "+objects.at(i).name + ": " + ofToString(objects.at(i).confidence),
-                                    r_scaled.x,r_scaled.y);
-    }
+// ██╗   ██╗██████╗ ██████╗  █████╗ ████████╗███████╗
+// ██║   ██║██╔══██╗██╔══██╗██╔══██╗╚══██╔══╝██╔════╝
+// ██║   ██║██████╔╝██║  ██║███████║   ██║   █████╗
+// ██║   ██║██╔═══╝ ██║  ██║██╔══██║   ██║   ██╔══╝
+// ╚██████╔╝██║     ██████╔╝██║  ██║   ██║   ███████╗
+//  ╚═════╝ ╚═╝     ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝
 
-    for(auto pp: person_persistance_list){
-        // pp.draw();
 
-        ofNoFill();
-        ofSetLineWidth(2);
-        ofSetColor(ofColor::tomato);
-        ofRectangle rect_scaled = pp.getScaledBB(_w, _h);
-        // cout << pp.id << endl;
-        cout << "X: " << pp.rect.getX() << " Y: " << pp.rect.getY() << " w: " << pp.rect.getWidth() << " h: " << pp.rect.getHeight() << endl;
-        ofDrawRectangle(rect_scaled);
-    }
-}
+
 
 void ofxYolov2::update(ofPixels &op) {
     // Scenario 1 Personlist is empty
@@ -217,8 +212,9 @@ void ofxYolov2::update(ofPixels &op) {
 
     cv::Mat frame = toCV(op);
 
-    if (frame.channels() == 4)
+    if (frame.channels() == 4){
         cvtColor(frame, frame, COLOR_BGRA2BGR);
+    }
 
     //! [Resizing without keeping aspect ratio]
     Mat resized;
@@ -236,7 +232,9 @@ void ofxYolov2::update(ofPixels &op) {
     if(yolo_version == 2){
         detectionMat = net.forward("detection_out");   //compute output for yolov2
     }else if(yolo_version == 3){
-        detectionMat = net.forward("yolo_23");   //compute output for yolov3
+        // https://github.com/opencv/opencv/blob/master/samples/dnn/object_detection.cpp
+        // v3 should work but seems a bit tricky
+        net.forward(outs, outNames);   //compute output for yolov3
     }
 
     for (int i = 0; i < detectionMat.rows; i++) {
@@ -403,14 +401,87 @@ void ofxYolov2::update(ofPixels &op) {
     }
     for(int i = person_persistance_list.size()-1; i>=0;i--){
         Person pp = person_persistance_list[i];
-        cout << " should i delete? " << pp.del << endl;
+        // cout << " should i delete? " << pp.del << endl;
         if(pp.del == true){
             cout << "removing person at index " << i << endl;
             person_persistance_list.erase(person_persistance_list.begin() + i);
         }
+
     }
 
+    // for(auto& pp: person_persistance_list){
+        if(person_persistance_list.size() > 0){
+        auto& pp = person_persistance_list[0];
+        ofRectangle ppbb = pp.getScaledBB(ofGetWidth(), ofGetHeight());
+        ofRectangle rect = ofRectangle(0,0,ofGetWidth(),ofGetHeight());
+
+        cout << "PP Height: " << ppbb.getHeight() << endl;
+        cout << "PP Width: " << ppbb.getWidth() << endl;
+        cout << "PP Area: " << ppbb.getArea() << endl;
+        cout << "PP Area%: " << (100/ rect.getArea()) * ppbb.getArea() << endl;
+
+        cout << "OF width: " << ofGetWidth() << endl;
+        cout << "OF height: " << ofGetHeight() << endl;
+        cout << "OF Area: " <<rect.getArea() << endl;
+        }
+
+    // }
 }
+
+
+
+
+
+// ██████╗ ██████╗  █████╗ ██╗    ██╗
+// ██╔══██╗██╔══██╗██╔══██╗██║    ██║
+// ██║  ██║██████╔╝███████║██║ █╗ ██║
+// ██║  ██║██╔══██╗██╔══██║██║███╗██║
+// ██████╔╝██║  ██║██║  ██║╚███╔███╔╝
+// ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝
+
+
+
+
+void ofxYolov2::draw(float _x, float _y, float _w, float _h) {
+
+    for( int i = 0; i < objects.size(); i++ ){
+        ofNoFill();
+        ofSetLineWidth(3);
+        ofSetColor(detection_color.at(objects[i].class_id));
+        ofRectangle r_scaled = objects.at(i).getScaledBB(_w, _h);
+        ofDrawRectangle(r_scaled);
+
+        ofFill();
+        ofDrawRectangle(r_scaled.x, r_scaled.y-18,r_scaled.width,18);
+        ofSetColor(ofColor::white);
+        font_info.drawString("["+ofToString(objects.at(i).class_id)+"]: "+objects.at(i).name + ": " + ofToString(objects.at(i).confidence),
+                                    r_scaled.x,r_scaled.y);
+    }
+
+
+    // Draw persistance persons
+
+    for(auto pp: person_persistance_list){
+
+        ofNoFill();
+        ofSetLineWidth(2);
+        ofSetColor(ofColor::tomato);
+        ofRectangle rect_scaled = pp.getScaledBB(_w, _h);
+        // cout << pp.id << endl;
+        // cout << "X: " << pp.rect.getX() << " Y: " << pp.rect.getY() << " w: " << pp.rect.getWidth() << " h: " << pp.rect.getHeight() << endl;
+        ofDrawRectangle(rect_scaled);
+        ofFill();
+        ofDrawRectangle(rect_scaled.x, rect_scaled.y,rect_scaled.width,18);
+        ofSetColor(ofColor::white);
+        font_info.drawString(
+            "["+  ofToString(pp.id)+ "]: " + ofToString(pp.timer),
+            rect_scaled.x,
+            rect_scaled.y + 18);
+    }
+}
+
+
+
 int ofxYolov2::getPersonCount(){
     int val = person_count;
     person_count++;
@@ -418,12 +489,19 @@ int ofxYolov2::getPersonCount(){
     return val;
 }
 
+
+
+
+
 void ofxYolov2::setConfidenceThreshold(float _threshold)
 {
     if( 0.0 <= _threshold && _threshold <= 1.0){
         confidenceThreshold = _threshold;
     }
 }
+
+
+
 
 void ofxYolov2::loadBoundingBoxFile(string _path_to_file)
 {
@@ -478,6 +556,7 @@ void ofxYolov2::loadBoundingBoxFile(string _path_to_file)
         }
     }
 }
+
 
 void ofxYolov2::saveAnnotation()
 {

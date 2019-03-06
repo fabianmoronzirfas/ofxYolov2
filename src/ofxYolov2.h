@@ -54,6 +54,8 @@ public:
     vector<string> classNamesVec;
     vector<ofColor> detection_color;
     vector<Person> person_persistance_list;
+    vector<String> outNames;
+
     float confidenceThreshold;
     ofTrueTypeFont font_info;
 

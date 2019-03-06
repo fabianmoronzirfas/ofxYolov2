@@ -25,10 +25,12 @@ ofRectangle Person::getScaledBB(float _w, float _h){
   // }
   void Person::update(const ofRectangle _r) {
     rect = ofRectangle(_r.getX(), _r.getY(), _r.getWidth(), _r.getHeight());
+    timer = 10;
   }
   void Person::countDown(){
     timer--;
   }
+
   bool Person::dead(){
     if (timer < 0){
       return true;
